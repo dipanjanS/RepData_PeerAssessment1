@@ -1,20 +1,124 @@
 # Reproducible Research: Peer Assessment 1
 
-
+<br>
 ## Loading and preprocessing the data
 
+The following section of code depicts how to load the data set and perform necessary
+preprocessing on it.
 
+```{r}
+# setting the working directory, change as needed
+setwd("C:/Users/Deadman/Documents/GitHub/RepData_PeerAssessment1/")  
 
+# loading the data in data frame
+data <- read.csv("activity.csv",header=TRUE, sep=",", na.strings="NA")
+
+# transforming the date variable to Date format
+data$date <- as.Date(as.character(data$date), "%Y-%m-%d")
+
+# viewing details of the data frame
+str(data)
+```
+  
+    
+<br>
 ## What is mean total number of steps taken per day?
 
+This sections consists of code to remove the missing values and plot a histogram of the number
+of steps taken each day and report the `mean` and `median` of the number of steps taken each day.
 
+```{r}
 
+#removing the missing values
+tidyData <- data[!is.na(data$steps), ]
+
+#performing aggregation to get the total sum of steps for each date
+stepData <- aggregate(steps~date, data=tidyData, FUN=sum)
+
+# disabling scientific notation
+options(scipen=999)
+
+# calculating the mean and median
+meanStep <- round(mean(stepData$steps),2)
+medianStep <- round(median(stepData$steps),2)
+
+# plotting the histogram as required
+hist(stepData$steps, col="lightblue", main="Total number of steps taken each day", xlab="Steps Per Day")
+
+```
+
+From the above calculations, we obtain the following results.
+ - __Mean__ total number of steps taken per day: _`r meanStep`_
+ - __Median__ total number of steps taken per day: _`r medianStep`_
+
+<br>
 ## What is the average daily activity pattern?
 
+In this section, we will make a time-series plot of the five minute interval vs. the average number of steps
+taken
 
+```{r}
+
+#calculating the average of steps for each time interval
+avgStep <- aggregate(steps~interval, tidyData, mean)
+
+#checking which five minute interval contains the maximum number of steps taken
+maxRowIndex <- which.max(avgStep$steps)
+maxInterval <- avgStep[maxRowIndex, 'interval']
+maxAvgStep <- round(avgStep[maxRowIndex, 'steps'],2)
+
+# plotting the time-series graph as required
+plot(avgStep$interval, avgStep$steps, type="l",xlab="Five minute intervals", ylab="Avg. steps taken", main="Average number of steps per time interval across all days")
+
+```
+
+Thus we observe from the data set that, on an average across all the days, the __'`r maxInterval`'__ five minute interval contains the maximum number of steps i.e, __(`r maxAvgStep` steps)__
 
 ## Imputing missing values
 
+```{r}
 
+#calulating the total number of missing values in the dataset
+missingCount <- sum(is.na(data$steps))
+
+```
+
+The total number of missing values in the dataset are: __`r missingCount`__
+
+```{r}
+
+#filling all of the missing values in the dataset  
+# STRATEGY: using mean of 5 minute interval
+
+#get the indexes with missing values
+missingIndexes <- which(is.na(data$steps))
+
+# getting the corresponding intervals
+missingIntervals <- data[missingIndexes, 3] 
+
+# filling the missing intervals with the mean of the corresponding five minute interval
+filledSteps <- sapply(missingIntervals, function(x) { avgStep[(avgStep$interval==x), 2]})
+
+#creating a new dataset that is same as the orginal dataset 
+newData <- data
+
+# now filling in the missing 'steps' data which we just computed above
+newData[missingIndexes, 'steps'] <- filledSteps
+summary(newData)
+#again, calculate the average of steps w.r.t. the time interval
+newStepData = aggregate(steps~date, data=newData, FUN=sum)
+
+#plot graph
+hist(newStepData$steps, col="lightblue", main="Total number of steps taken each day \n (new dataset filled missing data)", xlab="Total Number of Steps",breaks=5)
+
+#calculate the mean and median total number of steps taken per day
+newMeanStep <- round(mean(newStepData$steps),2)
+newMedianStep <- round(median(newStepData$steps),2)
+
+```
+
+### After filling the missing values
+* The __mean__ total number of steps taken per day: _`r newMeanStep`_
+* The __median__ total number of steps taken per day: _`r newMedianStep`_
 
 ## Are there differences in activity patterns between weekdays and weekends?
