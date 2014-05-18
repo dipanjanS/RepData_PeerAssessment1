@@ -187,7 +187,7 @@ In this section we will try to find out if there are any differences in the acti
 
 # creating a new factor variable 'day' with two levels 'Weekday' and
 # 'weekend'
-newData["day"] = factor(sapply(newData$date, function(x) {
+newData["day"] <- factor(sapply(newData$date, function(x) {
     if (weekdays(x) == "Sunday" | weekdays(x) == "Saturday") {
         "weekend"
     } else {
@@ -197,7 +197,7 @@ newData["day"] = factor(sapply(newData$date, function(x) {
 
 # performing aggregating to get the number of steps for the time interval
 # and day
-avgStepDay = aggregate(steps ~ interval + day, mean, data = newData)
+avgStepDay <- aggregate(steps ~ interval + day, mean, data = newData)
 
 # loading the lattice package
 library(lattice)
