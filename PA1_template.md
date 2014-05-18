@@ -76,7 +76,16 @@ taken
 
 # calculating the average of steps for each time interval
 avgStep <- aggregate(steps ~ interval, tidyData, mean)
+str(avgStep)
+```
 
+```
+## 'data.frame':	288 obs. of  2 variables:
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+##  $ steps   : num  1.717 0.3396 0.1321 0.1509 0.0755 ...
+```
+
+```r
 # checking which five minute interval contains the maximum number of steps
 # taken
 maxRowIndex <- which.max(avgStep$steps)
